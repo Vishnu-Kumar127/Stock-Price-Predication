@@ -207,7 +207,7 @@ def index():
     recent_table = None
     recent_graph = None
     visualize_graph = None
-    forecast_days = 0
+    forecast_days = 5
     if request.method == 'POST':
         selected_company = request.form.get('company')
         duration = int(request.form.get('duration', 30))
