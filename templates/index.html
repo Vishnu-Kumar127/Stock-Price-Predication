@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Stock Analysis</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='/style.css') }}">
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
@@ -21,7 +22,7 @@
                     $('#end_date').val(endDate.toISOString().split('T')[0]);
                 }
             }
-
+    
             function updateDurationFromDates() {
                 var start = new Date($('#start_date').val());
                 var end = new Date($('#end_date').val());
@@ -31,19 +32,19 @@
                     $('#duration').val(diffDays);
                 }
             }
-
+    
             // Event Listeners
             $('#duration').on('input', function() {
                 updateDatesFromDuration();
             });
-
+    
             $('#start_date, #end_date').on('change', function() {
                 updateDurationFromDates();
             });
-
+    
             // Trigger once on page load
             updateDatesFromDuration();
-
+    
             // -----------------------
             // Handle Action Change
             $('#action').change(function() {
@@ -51,16 +52,32 @@
                 if (action === 'Predict') {
                     $('#model_selection').show();
                     $('#visualize_option_selection').hide();
+                    $('#forecast_days_input').prop('required', true);  // Make forecast days required
                 } else if (action === 'Visualize') {
                     $('#model_selection').hide();
                     $('#visualize_option_selection').show();
+                    $('#forecast_days_input').prop('required', false);  // Remove requirement for forecast days
                 } else {
                     $('#model_selection').hide();
                     $('#visualize_option_selection').hide();
+                    $('#forecast_days_input').prop('required', false);  // Remove requirement for forecast days
                 }
-            }).trigger('change');
+            }).trigger('change'); // Ensure it runs on page load
+    
+            // -----------------------
+            // Make Forecast Days required only if Predict action is selected
+            function toggleForecastDays() {
+                if ($('#action').val() === 'Predict') {
+                    $('#forecast_days_input').prop('required', true);
+                } else {
+                    $('#forecast_days_input').prop('required', false);
+                }
+            }
+    
+            toggleForecastDays(); // Ensure correct state on page load
         });
     </script>
+    
 </head>
 <body>
     <div class="container-fluid">
