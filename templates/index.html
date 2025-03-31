@@ -1,68 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Stock Analysis</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='/style.css') }}">
-
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // -----------------------
-            // Auto-Adjust Duration & Dates
-            function updateDatesFromDuration() {
-                var days = parseInt($('#duration').val());
-                if (!isNaN(days) && days > 0) {
-                    var endDate = new Date();
-                    var startDate = new Date();
-                    startDate.setDate(endDate.getDate() - days);
-                    $('#start_date').val(startDate.toISOString().split('T')[0]);
-                    $('#end_date').val(endDate.toISOString().split('T')[0]);
-                }
-            }
-
-            function updateDurationFromDates() {
-                var start = new Date($('#start_date').val());
-                var end = new Date($('#end_date').val());
-                if ($('#start_date').val() && $('#end_date').val()) {
-                    var diffTime = Math.abs(end - start);
-                    var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    $('#duration').val(diffDays);
-                }
-            }
-
-            // Event Listeners
-            $('#duration').on('input', function() {
-                updateDatesFromDuration();
-            });
-
-            $('#start_date, #end_date').on('change', function() {
-                updateDurationFromDates();
-            });
-
-            // Trigger once on page load
-            updateDatesFromDuration();
-
-            // -----------------------
-            // Handle Action Change
-            $('#action').change(function() {
-                var action = $(this).val();
-                if (action === 'Predict') {
-                    $('#model_selection').show();
-                    $('#visualize_option_selection').hide();
-                } else if (action === 'Visualize') {
-                    $('#model_selection').hide();
-                    $('#visualize_option_selection').show();
-                } else {
-                    $('#model_selection').hide();
-                    $('#visualize_option_selection').hide();
-                }
-            }).trigger('change');
-        });
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container-fluid">
@@ -99,66 +41,70 @@
                             <option value="Recent Data" {% if action == 'Recent Data' %}selected{% endif %}>Recent Data</option>
                         </select>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary">Submit</button>
+
+                    <div class="form-group" id="model_selection" style="display: none;">
+                        <label>Select Model:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="model" id="lstm" value="LSTM" {% if model == 'LSTM' %}checked{% endif %}>
+                            <label class="form-check-label" for="lstm">LSTM</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="model" id="gru" value="GRU" {% if model == 'GRU' %}checked{% endif %}>
+                            <label class="form-check-label" for="gru">GRU</label>
+                        </div>
+
+                        <div class="form-group mt-3" id="forecast_days">
+                            <label for="forecast_days_input">How many days to forecast?</label>
+                            <input type="number" id="forecast_days_input" name="forecast_days" class="form-control" min="1" value="{{ forecast_days if forecast_days else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="visualize_option_selection" style="display: none;">
+                        <label>Select Visualization Option:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="visualize_option" id="open" value="Open" {% if visualize_option == 'Open' %}checked{% endif %}>
+                            <label class="form-check-label" for="open">Open</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="visualize_option" id="close" value="Close" {% if visualize_option == 'Close' %}checked{% endif %}>
+                            <label class="form-check-label" for="close">Close</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
                 </form>
             </div>
 
             <!-- Right Panel -->
             <div class="col-md-8 p-4">
-                <div class="form-group" id="model_selection" style="display: none;">
-                    <label>Select Model:</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="model" id="lstm" value="LSTM" {% if model == 'LSTM' %}checked{% endif %}>
-                        <label class="form-check-label" for="lstm">LSTM</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="model" id="gru" value="GRU" {% if model == 'GRU' %}checked{% endif %}>
-                        <label class="form-check-label" for="gru">GRU</label>
-                    </div>
-
-                    <div class="form-group mt-3" id="forecast_days">
-                        <label for="forecast_days_input">How many days to forecast?</label>
-                        <input type="number" id="forecast_days_input" name="forecast_days" class="form-control" min="1" value="{{ forecast_days if forecast_days else '' }}">
-                    </div>
-                </div>
-                <div class="form-group" id="visualize_option_selection" style="display: none;">
-                    <label>Select Visualization Option:</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="visualize_option" id="open" value="Open" {% if visualize_option == 'Open' %}checked{% endif %}>
-                        <label class="form-check-label" for="open">Open</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="visualize_option" id="close" value="Close" {% if visualize_option == 'Close' %}checked{% endif %}>
-                        <label class="form-check-label" for="close">Close</label>
-                    </div>
-                </div>
                 {% if action == 'Predict' %}
                     <h3>Prediction Results</h3>
-                    {% if prediction.get('plot_url') %}
+                    {% if prediction.get('plot_url', '') %}
                         <img src="{{ prediction.get('plot_url') }}" class="img-fluid">
                     {% endif %}
 
-                    {% if prediction.get('forecast') %}
+                    {% if prediction.get('forecast', '') %}
                         <hr>
                         <h3>Forecasted Next {{ forecast_days }} Days:</h3>
-                        <table border="3">
-                            <tr>
-                                <th>Date</th>
-                                <th>Predicted Price</th>
-                            </tr>
-                            {% for val in prediction.get('forecast') %}
-                            <tr>
-                                <td>{{ val.date }}</td>
-                                <td>{{ val.predicted_price }}</td>
-                            </tr>
-                            {% endfor %}
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Predicted Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for val in prediction.get('forecast', []) %}
+                                <tr>
+                                    <td>{{ val.date }}</td>
+                                    <td>{{ val.predicted_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
-                        
-                        
                     {% endif %}
 
-                    {% if prediction.get('metrics_table') %}
+                    {% if prediction.get('metrics_table', '') %}
                         <hr>
                         <h3>Model Metrics</h3>
                         {{ prediction.get('metrics_table') | safe }}
@@ -171,7 +117,7 @@
                     {% if recent_table %}
                         {{ recent_table|safe }}
                         {% if recent_graph %}
-                            <img src="{{ recent_graph }}" alt="Recent Data Graph" class="img-fluid">
+                            <img src="{{ url_for('static', filename=recent_graph.split('static/')[1]) }}" alt="Recent Data Graph" class="img-fluid">
                         {% endif %}
                     {% else %}
                         <p>No recent data available.</p>
@@ -180,5 +126,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Scripts at Bottom -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function updateDatesFromDuration() {
+                var days = parseInt($('#duration').val());
+                if (!isNaN(days) && days > 0) {
+                    var endDate = new Date();
+                    var startDate = new Date();
+                    startDate.setDate(endDate.getDate() - days);
+                    $('#start_date').val(startDate.toISOString().split('T')[0]);
+                    $('#end_date').val(endDate.toISOString().split('T')[0]);
+                }
+            }
+
+            function updateDurationFromDates() {
+                var start = new Date($('#start_date').val());
+                var end = new Date($('#end_date').val());
+                if ($('#start_date').val() && $('#end_date').val()) {
+                    var diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                    $('#duration').val(diffDays);
+                }
+            }
+
+            $('#duration').on('input', updateDatesFromDuration);
+            $('#start_date, #end_date').on('change', updateDurationFromDates);
+
+            $('#action').change(function() {
+                var action = $(this).val();
+                $('#model_selection').toggle(action === 'Predict');
+                $('#visualize_option_selection').toggle(action === 'Visualize');
+            }).trigger('change');
+
+            updateDatesFromDuration();
+        });
+    </script>
 </body>
 </html>
