@@ -216,13 +216,7 @@ def index():
         action = request.form.get('action')
         model = request.form.get('model', 'LSTM')
         visualize_option = request.form.get('visualize_option', 'Close')
-        # Safely handle forecast_days with a fallback value if not available
-        forecast_days = request.form.get('forecast_days', None)
-        if forecast_days:
-            try:
-                forecast_days = int(forecast_days)
-            except ValueError:
-                forecast_days = 5
+        forecast_days = int(request.form.get('forecast_days', 5))
 
         if action == 'Predict':
             prediction = perform_prediction(selected_company, model,forecast_days)

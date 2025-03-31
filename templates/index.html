@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +23,7 @@
                     $('#end_date').val(endDate.toISOString().split('T')[0]);
                 }
             }
-    
+
             function updateDurationFromDates() {
                 var start = new Date($('#start_date').val());
                 var end = new Date($('#end_date').val());
@@ -32,19 +33,19 @@
                     $('#duration').val(diffDays);
                 }
             }
-    
+
             // Event Listeners
             $('#duration').on('input', function() {
                 updateDatesFromDuration();
             });
-    
+
             $('#start_date, #end_date').on('change', function() {
                 updateDurationFromDates();
             });
-    
+
             // Trigger once on page load
             updateDatesFromDuration();
-    
+
             // -----------------------
             // Handle Action Change
             $('#action').change(function() {
@@ -52,32 +53,16 @@
                 if (action === 'Predict') {
                     $('#model_selection').show();
                     $('#visualize_option_selection').hide();
-                    $('#forecast_days_input').prop('required', true);  // Make forecast days required
                 } else if (action === 'Visualize') {
                     $('#model_selection').hide();
                     $('#visualize_option_selection').show();
-                    $('#forecast_days_input').prop('required', false);  // Remove requirement for forecast days
                 } else {
                     $('#model_selection').hide();
                     $('#visualize_option_selection').hide();
-                    $('#forecast_days_input').prop('required', false);  // Remove requirement for forecast days
                 }
-            }).trigger('change'); // Ensure it runs on page load
-    
-            // -----------------------
-            // Make Forecast Days required only if Predict action is selected
-            function toggleForecastDays() {
-                if ($('#action').val() === 'Predict') {
-                    $('#forecast_days_input').prop('required', true);
-                } else {
-                    $('#forecast_days_input').prop('required', false);
-                }
-            }
-    
-            toggleForecastDays(); // Ensure correct state on page load
+            }).trigger('change');
         });
     </script>
-    
 </head>
 <body>
     <div class="container-fluid">
@@ -114,39 +99,40 @@
                             <option value="Recent Data" {% if action == 'Recent Data' %}selected{% endif %}>Recent Data</option>
                         </select>
                     </div>
-                    <div class="form-group" id="model_selection" style="display: none;">
-                        <label>Select Model:</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="model" id="lstm" value="LSTM" {% if model == 'LSTM' %}checked{% endif %}>
-                            <label class="form-check-label" for="lstm">LSTM</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="model" id="gru" value="GRU" {% if model == 'GRU' %}checked{% endif %}>
-                            <label class="form-check-label" for="gru">GRU</label>
-                        </div>
-
-                        <div class="form-group mt-3" id="forecast_days">
-                            <label for="forecast_days_input">How many days to forecast?</label>
-                            <input type="number" id="forecast_days_input" name="forecast_days" class="form-control" min="1" value="{{ forecast_days if forecast_days else '' }}">
-                        </div>
-                    </div>
-                    <div class="form-group" id="visualize_option_selection" style="display: none;">
-                        <label>Select Visualization Option:</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="visualize_option" id="open" value="Open" {% if visualize_option == 'Open' %}checked{% endif %}>
-                            <label class="form-check-label" for="open">Open</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="visualize_option" id="close" value="Close" {% if visualize_option == 'Close' %}checked{% endif %}>
-                            <label class="form-check-label" for="close">Close</label>
-                        </div>
-                    </div>
+                    
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
             </div>
 
             <!-- Right Panel -->
             <div class="col-md-8 p-4">
+                <div class="form-group" id="model_selection" style="display: none;">
+                    <label>Select Model:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="model" id="lstm" value="LSTM" {% if model == 'LSTM' %}checked{% endif %}>
+                        <label class="form-check-label" for="lstm">LSTM</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="model" id="gru" value="GRU" {% if model == 'GRU' %}checked{% endif %}>
+                        <label class="form-check-label" for="gru">GRU</label>
+                    </div>
+
+                    <div class="form-group mt-3" id="forecast_days">
+                        <label for="forecast_days_input">How many days to forecast?</label>
+                        <input type="number" id="forecast_days_input" name="forecast_days" class="form-control" min="1" value="{{ forecast_days if forecast_days else '' }}">
+                    </div>
+                </div>
+                <div class="form-group" id="visualize_option_selection" style="display: none;">
+                    <label>Select Visualization Option:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="visualize_option" id="open" value="Open" {% if visualize_option == 'Open' %}checked{% endif %}>
+                        <label class="form-check-label" for="open">Open</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="visualize_option" id="close" value="Close" {% if visualize_option == 'Close' %}checked{% endif %}>
+                        <label class="form-check-label" for="close">Close</label>
+                    </div>
+                </div>
                 {% if action == 'Predict' %}
                     <h3>Prediction Results</h3>
                     {% if prediction.get('plot_url') %}
